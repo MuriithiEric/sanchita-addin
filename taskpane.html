@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Command Centre</title>
+<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/dist/tabler-icons.min.css"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg2: #f5f5f5;
+    --bg3: #eeeeee;
+    --text: #1a1a1a;
+    --text2: #555555;
+    --text3: #888888;
+    --border: rgba(0,0,0,0.1);
+    --border2: rgba(0,0,0,0.18);
+    --accent: #0078d4;
+    --accent-bg: #e8f1fb;
+    --accent-text: #004e8c;
+    --danger: #c4314b;
+    --danger-bg: #fde7ea;
+    --danger-text: #8e0a1e;
+    --warn: #8a5700;
+    --warn-bg: #fff4ce;
+    --warn-text: #6b3a00;
+    --success: #107c10;
+    --success-bg: #dff6dd;
+    --success-text: #0a4d0a;
+    --radius: 6px;
+    --radius-lg: 10px;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--bg);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .logo i { color: var(--accent); font-size: 16px; }
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text2);
+  }
+  .av {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--accent-bg); color: var(--accent-text);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700;
+  }
+
+  /* NAV */
+  .nav {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+  .nav-tab {
+    flex: 1;
+    padding: 9px 4px 8px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 11px;
+    color: var(--text2);
+    border-bottom: 2px solid transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    transition: color 0.15s;
+    font-family: inherit;
+  }
+  .nav-tab i { font-size: 16px; }
+  .nav-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    font-weight: 600;
+  }
+  .nav-tab:hover:not(.active) { color: var(--text); background: var(--bg2); }
+  .badge {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    font-size: 9px;
+    padding: 1px 4px;
+    border-radius: 8px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  /* CONTENT */
+  .content { flex: 1; overflow-y: auto; }
+  .panel { display: none; padding: 12px 14px; }
+  .panel.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text3);
+    margin-bottom: 8px;
+  }
+
+  /* AI BANNER */
+  .ai-banner {
+    background: var(--accent-bg);
+    border: 1px solid rgba(0,120,212,0.2);
+    border-radius: var(--radius-lg);
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .ai-banner i { color: var(--accent); font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .ai-banner-text { flex: 1; font-size: 12px; color: var(--text); line-height: 1.5; }
+  .ai-banner-text strong { color: var(--accent-text); }
+
+  /* STAT GRID */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .stat {
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 10px 8px;
+    text-align: center;
+  }
+  .stat .n { font-size: 20px; font-weight: 700; color: var(--text); }
+  .stat .l { font-size: 10px; color: var(--text3); margin-bottom: 2px; }
+
+  /* EMAILS */
+  .email-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .email-item:last-child { border-bottom: none; }
+  .email-item:hover { background: var(--bg2); margin: 0 -12px; padding: 9px 12px; border-radius: var(--radius); }
+  .e-av {
+    width: 30px; height: 30px; min-width: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+  }
+  .e-body { flex: 1; min-width: 0; }
+  .e-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1px; }
+  .e-from { font-size: 12px; font-weight: 600; color: var(--text); }
+  .e-time { font-size: 10px; color: var(--text3); }
+  .e-subject { font-size: 12px; color: var(--text); margin-bottom: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .e-preview { font-size: 11px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tags { display: flex; gap: 3px; margin-top: 4px; flex-wrap: wrap; }
+  .tag {
+    font-size: 9px; padding: 2px 6px; border-radius: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+  }
+  .tag.urgent { background: var(--danger-bg); color: var(--danger-text); }
+  .tag.reply { background: var(--warn-bg); color: var(--warn-text); }
+  .tag.info { background: var(--accent-bg); color: var(--accent-text); }
+  .tag.done { background: var(--success-bg); color: var(--success-text); }
+
+  /* BUTTONS */
+  .btn {
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 6px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    background: var(--bg);
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: inherit;
+    transition: background 0.1s;
+  }
+  .btn:hover { background: var(--bg2); }
+  .btn.primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .btn.primary:hover { background: #106ebe; }
+  .btn.sm { padding: 4px 8px; font-size: 10px; }
+  .btn-row { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+
+  /* TASKS */
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .task-item:last-child { border-bottom: none; }
+  .chk {
+    width: 16px; height: 16px; min-width: 16px;
+    border-radius: 50%; border: 1.5px solid var(--border2);
+    cursor: pointer; display: flex; align-items: center;
+    justify-content: center; margin-top: 1px;
+  }
+  .chk.done { background: var(--success-bg); border-color: var(--success); }
+  .chk.done i { font-size: 10px; color: var(--success); }
+  .task-body { flex: 1; min-width: 0; }
+  .task-title { font-size: 12px; color: var(--text); }
+  .task-title.done { text-decoration: line-through; opacity: 0.5; }
+  .task-meta {
+    font-size: 10px; color: var(--text3); margin-top: 2px;
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  }
+  .overdue-lbl { color: var(--danger); font-weight: 700; display: flex; align-items: center; gap: 2px; }
+  .mini-av {
+    width: 16px; height: 16px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 8px; font-weight: 700;
+  }
+
+  /* STAFF */
+  .staff-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px; background: var(--bg2);
+    border-radius: var(--radius); margin-bottom: 6px;
+  }
+  .staff-av {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .staff-info { flex: 1; }
+  .staff-name { font-size: 12px; font-weight: 600; color: var(--text); }
+  .staff-sub { font-size: 10px; color: var(--text3); margin-top: 1px; }
+  .prog { height: 3px; background: var(--bg3); border-radius: 3px; margin-top: 5px; }
+  .prog-fill { height: 100%; border-radius: 3px; }
+
+  .nudge-item {
+    background: var(--warn-bg);
+    border: 1px solid rgba(138,87,0,0.2);
+    border-radius: var(--radius);
+    padding: 9px 10px;
+    margin-bottom: 6px;
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  .nudge-item i { color: var(--warn); font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .nudge-name { font-size: 12px; font-weight: 600; color: var(--text); }
+  .nudge-reason { font-size: 10px; color: var(--text2); margin-top: 1px; }
+
+  /* PLANNER */
+  .plan-item {
+    border-left: 3px solid var(--border2);
+    padding: 7px 10px;
+    margin-bottom: 6px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    background: var(--bg2);
+  }
+  .plan-time { font-size: 10px; color: var(--text3); margin-bottom: 2px; }
+  .plan-task { font-size: 12px; font-weight: 600; color: var(--text); }
+  .plan-note { font-size: 10px; color: var(--text2); margin-top: 2px; }
+
+  /* EMAIL DETAIL */
+  .email-detail { display: none; }
+  .email-detail.open { display: block; }
+  .email-list-view { }
+  .email-list-view.hidden { display: none; }
+  .detail-header {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+  }
+  .detail-subject { font-size: 13px; font-weight: 700; flex: 1; }
+  .detail-body {
+    background: var(--bg2); border-radius: var(--radius);
+    padding: 12px; font-size: 12px; line-height: 1.6;
+    color: var(--text); margin-bottom: 12px; max-height: 180px;
+    overflow-y: auto;
+  }
+  .ai-reply {
+    background: var(--accent-bg);
+    border: 1px solid rgba(0,120,212,0.2);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    font-size: 12px; line-height: 1.6;
+    color: var(--text); margin-bottom: 8px;
+  }
+  .ai-reply-lbl {
+    font-size: 10px; font-weight: 700; color: var(--accent-text);
+    display: flex; align-items: center; gap: 4px; margin-bottom: 5px;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .compose-area {
+    width: 100%; border: 1px solid var(--border2);
+    border-radius: var(--radius); padding: 8px; font-size: 12px;
+    font-family: inherit; resize: vertical; min-height: 80px;
+    background: var(--bg); color: var(--text); margin-bottom: 8px;
+  }
+
+  /* TASK FORM */
+  .form-group { margin-bottom: 10px; }
+  .form-label { font-size: 11px; color: var(--text2); margin-bottom: 3px; display: block; font-weight: 600; }
+  .form-input, .form-select {
+    width: 100%; border: 1px solid var(--border2);
+    border-radius: var(--radius); padding: 6px 8px;
+    font-size: 12px; font-family: inherit;
+    background: var(--bg); color: var(--text);
+  }
+  .form-input:focus, .form-select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+  .flex-between { display: flex; align-items: center; justify-content: space-between; }
+  .flex-gap { display: flex; align-items: center; gap: 6px; }
+
+  /* CURRENT EMAIL CONTEXT */
+  .ctx-banner {
+    background: var(--success-bg);
+    border: 1px solid rgba(16,124,16,0.2);
+    border-radius: var(--radius);
+    padding: 8px 10px;
+    font-size: 11px;
+    color: var(--success-text);
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: 10px;
+  }
+  .ctx-banner i { font-size: 13px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <i class="ti ti-command" aria-hidden="true"></i>
+    Command Centre
+  </div>
+  <div class="user-chip">
+    <div class="av">SS</div>
+    Sanchita
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-tab active" onclick="showTab('inbox')" id="tab-inbox">
+    <i class="ti ti-inbox" aria-hidden="true"></i>
+    Inbox
+  </button>
+  <button class="nav-tab" onclick="showTab('tasks')" id="tab-tasks">
+    <i class="ti ti-checkbox" aria-hidden="true"></i>
+    Tasks
+  </button>
+  <button class="nav-tab" onclick="showTab('team')" id="tab-team">
+    <i class="ti ti-users" aria-hidden="true"></i>
+    Team
+    <span class="badge" id="team-badge">2</span>
+  </button>
+  <button class="nav-tab" onclick="showTab('planner')" id="tab-planner">
+    <i class="ti ti-calendar" aria-hidden="true"></i>
+    Plan
+  </button>
+</div>
+
+<div class="content">
+
+  <!-- ── INBOX ── -->
+  <div class="panel active" id="panel-inbox">
+
+    <div id="ctx-box" class="ctx-banner hidden">
+      <i class="ti ti-mail-opened" aria-hidden="true"></i>
+      <span id="ctx-text">Reading current email...</span>
+    </div>
+
+    <!-- email list view -->
+    <div id="email-list-view">
+      <div class="ai-banner">
+        <i class="ti ti-sparkles" aria-hidden="true"></i>
+        <div class="ai-banner-text">
+          <strong>AI summary:</strong> 3 urgent replies needed · 1 invoice due Friday · 2 staff items awaiting action.
+        </div>
+      </div>
+
+      <div class="flex-between" style="margin-bottom:8px">
+        <div class="section-label" style="margin:0">Recent emails</div>
+        <button class="btn sm" onclick="loadCurrentEmail()">
+          <i class="ti ti-refresh" aria-hidden="true"></i> Refresh
+        </button>
+      </div>
+
+      <div class="card" style="padding:4px 12px" id="email-list-container"></div>
+
+      <div class="btn-row">
+        <button class="btn primary" onclick="showCompose()">
+          <i class="ti ti-pencil" aria-hidden="true"></i> Compose
+        </button>
+        <button class="btn" onclick="aiTriageAll()">
+          <i class="ti ti-sparkles" aria-hidden="true"></i> AI triage all
+        </button>
+      </div>
+    </div>
+
+    <!-- email detail / compose view -->
+    <div id="email-detail-view" class="hidden">
+      <div class="detail-header">
+        <button class="btn sm" onclick="backToList()">
+          <i class="ti ti-arrow-left" aria-hidden="true"></i> Back
+        </button>
+        <span class="detail-subject" id="detail-subject">—</span>
+      </div>
+      <div class="detail-body" id="detail-body">—</div>
+      <div id="ai-reply-block" class="hidden">
+        <div class="ai-reply">
+          <div class="ai-reply-lbl"><i class="ti ti-sparkles"></i> AI draft reply</div>
+          <div id="ai-reply-text">—</div>
+        </div>
+      </div>
+      <textarea class="compose-area" id="reply-area" placeholder="Edit reply here before sending..."></textarea>
+      <div class="btn-row">
+        <button class="btn primary" onclick="sendReply()">
+          <i class="ti ti-send" aria-hidden="true"></i> Send reply
+        </button>
+        <button class="btn" onclick="generateAIReply()">
+          <i class="ti ti-sparkles" aria-hidden="true"></i> AI draft
+        </button>
+        <button class="btn" onclick="assignTaskFromEmail()">
+          <i class="ti ti-checkbox" aria-hidden="true"></i> Assign task
+        </button>
+      </div>
+    </div>
+
+    <!-- compose new -->
+    <div id="compose-view" class="hidden">
+      <div class="detail-header">
+        <button class="btn sm" onclick="backToList()">
+          <i class="ti ti-arrow-left" aria-hidden="true"></i> Back
+        </button>
+        <span class="detail-subject">New email</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">To</label>
+        <input type="text" class="form-input" id="compose-to" placeholder="recipient@company.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Subject</label>
+        <input type="text" class="form-input" id="compose-subject" placeholder="Subject..."/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Quick notes (AI will draft)</label>
+        <input type="text" class="form-input" id="compose-notes" placeholder="e.g. decline Tuesday meeting, suggest Friday 3pm"/>
+      </div>
+      <div id="compose-ai-block" class="hidden">
+        <div class="ai-reply">
+          <div class="ai-reply-lbl"><i class="ti ti-sparkles"></i> AI draft</div>
+          <div id="compose-ai-text">—</div>
+        </div>
+      </div>
+      <textarea class="compose-area" id="compose-body" placeholder="Your message..."></textarea>
+      <div class="btn-row">
+        <button class="btn primary" onclick="sendComposed()">
+          <i class="ti ti-send" aria-hidden="true"></i> Send
+        </button>
+        <button class="btn" onclick="generateComposeDraft()">
+          <i class="ti ti-sparkles" aria-hidden="true"></i> AI draft
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TASKS ── -->
+  <div class="panel" id="panel-tasks">
+    <div class="stat-grid">
+      <div class="stat"><div class="l">Assigned</div><div class="n" id="s-total">0</div></div>
+      <div class="stat"><div class="l">Done</div><div class="n" id="s-done" style="color:var(--success)">0</div></div>
+      <div class="stat"><div class="l">Overdue</div><div class="n" id="s-overdue" style="color:var(--danger)">0</div></div>
+    </div>
+
+    <div id="task-form-block" class="card hidden">
+      <div class="section-label">Assign new task</div>
+      <div class="form-group">
+        <label class="form-label">Task title</label>
+        <input type="text" class="form-input" id="new-task-title" placeholder="e.g. Complete Q2 dashboard"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Assign to</label>
+        <select class="form-select" id="new-task-assignee">
+          <option>Priya Mehta</option>
+          <option>David Otieno</option>
+          <option>Aisha Kamau</option>
+          <option>James Waweru</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Due date</label>
+        <input type="date" class="form-input" id="new-task-due"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Priority</label>
+        <select class="form-select" id="new-task-priority">
+          <option>High</option>
+          <option>Medium</option>
+          <option>Low</option>
+        </select>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary" onclick="addTask()"><i class="ti ti-check"></i> Assign</button>
+        <button class="btn" onclick="toggleTaskForm()">Cancel</button>
+      </div>
+    </div>
+
+    <div class="flex-between" style="margin-bottom:8px">
+      <div class="section-label" style="margin:0">All tasks</div>
+      <button class="btn sm primary" onclick="toggleTaskForm()">
+        <i class="ti ti-plus" aria-hidden="true"></i> Assign task
+      </button>
+    </div>
+
+    <div class="card" style="padding:4px 12px" id="task-list-container"></div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="followUpOverdue()">
+        <i class="ti ti-mail-forward" aria-hidden="true"></i> Follow up overdue
+      </button>
+    </div>
+  </div>
+
+  <!-- ── TEAM ── -->
+  <div class="panel" id="panel-team">
+    <div class="section-label">Needs a nudge</div>
+    <div id="nudge-container"></div>
+
+    <div class="section-label" style="margin-top:14px">Team productivity</div>
+    <div id="staff-container"></div>
+  </div>
+
+  <!-- ── PLANNER ── -->
+  <div class="panel" id="panel-planner">
+    <div class="ai-banner" style="margin-bottom:12px">
+      <i class="ti ti-sparkles" aria-hidden="true"></i>
+      <div class="ai-banner-text">
+        <strong>Today's plan</strong> auto-built from your tasks, priorities, and team follow-ups.
+      </div>
+    </div>
+    <div class="section-label">Wednesday, 20 May 2026</div>
+    <div id="plan-container"></div>
+    <button class="btn" style="margin-top:4px" onclick="rebuildPlan()">
+      <i class="ti ti-refresh" aria-hidden="true"></i> Rebuild plan
+    </button>
+  </div>
+
+</div>
+
+<script>
+/* ── DATA ── */
+const EMAILS = [
+  { id:1, from:"James Waweru", ini:"JW", bg:"#dff6fa", tc:"#006d8f", subject:"Budget approval needed — urgent", preview:"Hi Sanchita, we need sign-off on the Q2 budget before Friday...", body:"Hi Sanchita,\n\nWe need your sign-off on the Q2 budget before Friday close of business. The total is KES 420,000. Finance will not process without your approval. Please let me know ASAP.\n\nJames", time:"9:14am", tags:["urgent","reply"] },
+  { id:2, from:"Priya Mehta", ini:"PM", bg:"#dff6dd", tc:"#107c10", subject:"Monthly report submitted ✓", preview:"Please find the completed monthly report attached...", body:"Hi Sanchita,\n\nPlease find the completed monthly report attached as requested. Let me know if you need any changes.\n\nBest,\nPriya", time:"8:45am", tags:["done"] },
+  { id:3, from:"NexaGroup Client", ini:"NG", bg:"#fff4ce", tc:"#6b3a00", subject:"Follow-up on revised proposal", preview:"We are still waiting on the revised proposal you mentioned...", body:"Dear Sanchita,\n\nWe are still waiting on the revised proposal you mentioned last Thursday. Could you please provide an update? We have a board meeting on Friday and would like to include your figures.\n\nRegards,\nNexaGroup", time:"Tue", tags:["urgent","reply"] },
+  { id:4, from:"Aisha Kamau", ini:"AK", bg:"#fde7ea", tc:"#8e0a1e", subject:"Sick leave notice — Fri 23 May", preview:"Hi, just wanted to let you know I will be out Friday...", body:"Hi Sanchita,\n\nJust wanted to let you know I'll be out on Friday 23rd May. I've briefed David on the onboarding pack. Hope that's okay.\n\nAisha", time:"Tue", tags:["info"] },
+  { id:5, from:"HR Department", ini:"HR", bg:"#f0f0f0", tc:"#555", subject:"Appraisal forms due 31 May", preview:"Reminder: staff performance appraisals are due by 31 May...", body:"Hi Sanchita,\n\nThis is a reminder that all staff performance appraisal forms are due by 31 May. Please ensure your team members have been reviewed.\n\nHR Team", time:"Mon", tags:["reply"] },
+  { id:6, from:"David Otieno", ini:"DO", bg:"#e1f5ee", tc:"#0f6e56", subject:"Dashboard still in progress", preview:"Hi, the analytics dashboard is taking longer than expected...", body:"Hi Sanchita,\n\nThe analytics dashboard is taking a bit longer than expected. I've run into some issues with the data pipeline. Should be done by end of week. Apologies for the delay.\n\nDavid", time:"Mon", tags:["info"] },
+];
+
+let TASKS = [
+  { id:1, title:"Complete Q2 analytics dashboard", assignee:"David Otieno", ini:"DO", bg:"#e1f5ee", tc:"#0f6e56", due:"2026-05-18", done:false, overdue:true, priority:"High" },
+  { id:2, title:"Submit monthly report", assignee:"Priya Mehta", ini:"PM", bg:"#dff6dd", tc:"#107c10", due:"2026-05-20", done:true, overdue:false, priority:"High" },
+  { id:3, title:"Respond to NexaGroup proposal", assignee:"Sanchita (self)", ini:"SS", bg:"#dff6fa", tc:"#006d8f", due:"2026-05-21", done:false, overdue:false, priority:"High" },
+  { id:4, title:"Submit staff appraisal forms", assignee:"James Waweru", ini:"JW", bg:"#fff4ce", tc:"#6b3a00", due:"2026-05-22", done:false, overdue:false, priority:"Medium" },
+  { id:5, title:"Prepare onboarding pack", assignee:"Aisha Kamau", ini:"AK", bg:"#fde7ea", tc:"#8e0a1e", due:"2026-05-19", done:false, overdue:true, priority:"Medium" },
+];
+let nextTaskId = 6;
+
+const STAFF = [
+  { name:"Priya Mehta", ini:"PM", bg:"#dff6dd", tc:"#107c10", total:3, done:3, nudge:false, reason:"" },
+  { name:"David Otieno", ini:"DO", bg:"#e1f5ee", tc:"#0f6e56", total:2, done:0, nudge:true, reason:"Dashboard 2 days overdue — no update provided" },
+  { name:"Aisha Kamau", ini:"AK", bg:"#fde7ea", tc:"#8e0a1e", total:2, done:0, nudge:true, reason:"Onboarding pack overdue — on sick leave Friday" },
+  { name:"James Waweru", ini:"JW", bg:"#fff4ce", tc:"#6b3a00", total:2, done:1, nudge:false, reason:"" },
+];
+
+const PLAN = [
+  { time:"8:00 – 8:30", task:"Email triage", note:"Review AI-flagged urgents only", color:"#0078d4" },
+  { time:"8:30 – 9:30", task:"Reply to NexaGroup", note:"Client waiting since Thursday — high priority", color:"#c4314b" },
+  { time:"9:30 – 10:00", task:"Budget sign-off for James", note:"Finance deadline Friday", color:"#c4314b" },
+  { time:"10:00 – 10:30", task:"Check in with David", note:"Dashboard overdue — schedule quick sync", color:"#8a5700" },
+  { time:"10:30 – 12:00", task:"Staff appraisals", note:"Due 31 May — start James and Aisha", color:"#107c10" },
+  { time:"12:00 – 13:00", task:"Lunch + buffer", note:"", color:"#888" },
+  { time:"13:00 – 14:00", task:"Team follow-ups", note:"AI drafts follow-up emails for overdue items", color:"#0078d4" },
+  { time:"14:00 – 15:30", task:"Deep work block", note:"Strategic planning — no interruptions", color:"#107c10" },
+  { time:"15:30 – 16:00", task:"Inbox sweep", note:"AI handles routine replies", color:"#0078d4" },
+];
+
+/* ── RENDER ── */
+function renderEmails() {
+  document.getElementById('email-list-container').innerHTML = EMAILS.map(e => `
+    <div class="email-item" onclick="openEmail(${e.id})">
+      <div class="e-av" style="background:${e.bg};color:${e.tc}">${e.ini}</div>
+      <div class="e-body">
+        <div class="e-top"><span class="e-from">${e.from}</span><span class="e-time">${e.time}</span></div>
+        <div class="e-subject">${e.subject}</div>
+        <div class="e-preview">${e.preview}</div>
+        <div class="tags">${e.tags.map(t=>`<span class="tag ${t}">${t}</span>`).join('')}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderTasks() {
+  const total = TASKS.length;
+  const done = TASKS.filter(t=>t.done).length;
+  const overdue = TASKS.filter(t=>t.overdue&&!t.done).length;
+  document.getElementById('s-total').textContent = total;
+  document.getElementById('s-done').textContent = done;
+  document.getElementById('s-overdue').textContent = overdue;
+  document.getElementById('task-list-container').innerHTML = TASKS.map(t => `
+    <div class="task-item">
+      <div class="chk ${t.done?'done':''}" onclick="toggleTask(${t.id})">
+        ${t.done?'<i class="ti ti-check"></i>':''}
+      </div>
+      <div class="task-body">
+        <div class="task-title ${t.done?'done':''}">${t.title}</div>
+        <div class="task-meta">
+          <span class="mini-av" style="background:${t.bg};color:${t.tc}">${t.ini}</span>
+          ${t.assignee} · ${t.due}
+          ${t.overdue&&!t.done?'<span class="overdue-lbl"><i class="ti ti-alert-circle"></i>Overdue</span>':''}
+          <span class="tag ${t.priority==='High'?'urgent':t.priority==='Medium'?'reply':'info'}">${t.priority}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function renderTeam() {
+  const nudges = STAFF.filter(s=>s.nudge);
+  document.getElementById('team-badge').textContent = nudges.length;
+  document.getElementById('nudge-container').innerHTML = nudges.map(s=>`
+    <div class="nudge-item">
+      <i class="ti ti-alert-triangle"></i>
+      <div>
+        <div class="nudge-name">${s.name}</div>
+        <div class="nudge-reason">${s.reason}</div>
+        <div class="btn-row">
+          <button class="btn sm" onclick="draftFollowUp('${s.name}')">
+            <i class="ti ti-mail"></i> Draft follow-up
+          </button>
+        </div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('staff-container').innerHTML = STAFF.map(s=>{
+    const pct = s.total?Math.round((s.done/s.total)*100):0;
+    const fc = pct===100?'var(--success)':s.nudge?'var(--danger)':'var(--warn)';
+    return `<div class="staff-item">
+      <div class="staff-av" style="background:${s.bg};color:${s.tc}">${s.ini}</div>
+      <div class="staff-info">
+        <div class="staff-name">${s.name}</div>
+        <div class="staff-sub">${s.done}/${s.total} tasks · ${pct}% complete</div>
+        <div class="prog"><div class="prog-fill" style="width:${pct}%;background:${fc}"></div></div>
+      </div>
+      <span class="tag ${pct===100?'done':s.nudge?'urgent':'reply'}">${pct===100?'On track':s.nudge?'Overdue':'Active'}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderPlan() {
+  document.getElementById('plan-container').innerHTML = PLAN.map(p=>`
+    <div class="plan-item" style="border-left-color:${p.color}">
+      <div class="plan-time">${p.time}</div>
+      <div class="plan-task">${p.task}</div>
+      ${p.note?`<div class="plan-note">${p.note}</div>`:''}
+    </div>`).join('');
+}
+
+/* ── TABS ── */
+function showTab(name) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+/* ── INBOX LOGIC ── */
+let currentEmailId = null;
+
+function openEmail(id) {
+  const e = EMAILS.find(x=>x.id===id);
+  if(!e) return;
+  currentEmailId = id;
+  document.getElementById('email-list-view').classList.add('hidden');
+  document.getElementById('email-detail-view').classList.remove('hidden');
+  document.getElementById('compose-view').classList.add('hidden');
+  document.getElementById('detail-subject').textContent = e.subject;
+  document.getElementById('detail-body').textContent = e.body;
+  document.getElementById('ai-reply-block').classList.add('hidden');
+  document.getElementById('reply-area').value = '';
+}
+
+function backToList() {
+  document.getElementById('email-list-view').classList.remove('hidden');
+  document.getElementById('email-detail-view').classList.add('hidden');
+  document.getElementById('compose-view').classList.add('hidden');
+}
+
+function showCompose() {
+  document.getElementById('email-list-view').classList.add('hidden');
+  document.getElementById('email-detail-view').classList.add('hidden');
+  document.getElementById('compose-view').classList.remove('hidden');
+}
+
+function generateAIReply() {
+  const e = EMAILS.find(x=>x.id===currentEmailId);
+  if(!e) return;
+  const drafts = {
+    1: "Hi James,\n\nThank you for flagging this. I've reviewed the Q2 budget and I'm approving the KES 420,000 as submitted. Please proceed with Finance.\n\nBest regards,\nSanchita",
+    2: "Hi Priya,\n\nThank you for submitting the report on time — it looks great. I'll review it this afternoon.\n\nBest,\nSanchita",
+    3: "Dear NexaGroup,\n\nApologies for the delay. Please find the revised proposal attached. I look forward to your feedback ahead of Friday's board meeting.\n\nKind regards,\nSanchita Singh",
+    4: "Hi Aisha,\n\nNo problem at all — thank you for letting me know and for briefing David. Rest well.\n\nBest,\nSanchita",
+    5: "Hi HR,\n\nThank you for the reminder. I will ensure all appraisals are completed before the 31st deadline.\n\nRegards,\nSanchita",
+    6: "Hi David,\n\nThanks for the update. Let's schedule a quick 15-minute sync tomorrow to unblock you. I'll send a calendar invite.\n\nBest,\nSanchita",
+  };
+  const draft = drafts[currentEmailId] || "Hi,\n\nThank you for your message. I will revert shortly.\n\nBest regards,\nSanchita Singh";
+  document.getElementById('ai-reply-text').textContent = draft;
+  document.getElementById('ai-reply-block').classList.remove('hidden');
+  document.getElementById('reply-area').value = draft;
+}
+
+function sendReply() {
+  const body = document.getElementById('reply-area').value.trim();
+  if(!body) return;
+  if(Office && Office.context && Office.context.mailbox) {
+    const e = EMAILS.find(x=>x.id===currentEmailId);
+    Office.context.mailbox.displayReplyAllForm({
+      htmlBody: body.replace(/\n/g,'<br>')
+    });
+  } else {
+    alert('Reply ready to send:\n\n' + body);
+  }
+  backToList();
+}
+
+function generateComposeDraft() {
+  const notes = document.getElementById('compose-notes').value || 'follow up professionally';
+  const to = document.getElementById('compose-to').value || 'recipient';
+  const subj = document.getElementById('compose-subject').value || 'your request';
+  const draft = `Dear ${to.split('@')[0] || 'team'},\n\nThank you for your message regarding ${subj}. ${notes.charAt(0).toUpperCase()+notes.slice(1)}.\n\nPlease let me know if you need anything further.\n\nBest regards,\nSanchita Singh`;
+  document.getElementById('compose-ai-text').textContent = draft;
+  document.getElementById('compose-ai-block').classList.remove('hidden');
+  document.getElementById('compose-body').value = draft;
+}
+
+function sendComposed() {
+  const to = document.getElementById('compose-to').value;
+  const subj = document.getElementById('compose-subject').value;
+  const body = document.getElementById('compose-body').value;
+  if(Office && Office.context && Office.context.mailbox) {
+    Office.context.mailbox.displayNewMessageForm({
+      toRecipients: [to],
+      subject: subj,
+      htmlBody: body.replace(/\n/g,'<br>')
+    });
+  } else {
+    alert('Email ready:\n\nTo: ' + to + '\nSubject: ' + subj + '\n\n' + body);
+  }
+  backToList();
+}
+
+function loadCurrentEmail() {
+  if(Office && Office.context && Office.context.mailbox && Office.context.mailbox.item) {
+    const item = Office.context.mailbox.item;
+    document.getElementById('ctx-box').classList.remove('hidden');
+    document.getElementById('ctx-text').textContent = 'Reading: ' + (item.subject || '(no subject)');
+  } else {
+    document.getElementById('ctx-box').classList.remove('hidden');
+    document.getElementById('ctx-text').textContent = 'Demo mode — connect to Outlook to read live emails';
+  }
+}
+
+function aiTriageAll() {
+  alert('AI triage: 3 urgent replies flagged (NexaGroup, James budget, HR appraisals). 2 items delegated to staff. 1 FYI archived.');
+}
+
+/* ── TASKS ── */
+function toggleTaskForm() {
+  const block = document.getElementById('task-form-block');
+  block.classList.toggle('hidden');
+  if(!block.classList.contains('hidden')) {
+    const d = new Date(); d.setDate(d.getDate()+3);
+    document.getElementById('new-task-due').value = d.toISOString().split('T')[0];
+  }
+}
+
+function addTask() {
+  const title = document.getElementById('new-task-title').value.trim();
+  if(!title) return;
+  const assignee = document.getElementById('new-task-assignee').value;
+  const due = document.getElementById('new-task-due').value;
+  const priority = document.getElementById('new-task-priority').value;
+  const colorMap = { "Priya Mehta":["#dff6dd","#107c10","PM"], "David Otieno":["#e1f5ee","#0f6e56","DO"], "Aisha Kamau":["#fde7ea","#8e0a1e","AK"], "James Waweru":["#fff4ce","#6b3a00","JW"] };
+  const [bg, tc, ini] = colorMap[assignee] || ["#f0f0f0","#555","?"];
+  TASKS.push({ id:nextTaskId++, title, assignee, ini, bg, tc, due, done:false, overdue:false, priority });
+  document.getElementById('new-task-title').value = '';
+  toggleTaskForm();
+  renderTasks(); renderTeam();
+
+  if(Office && Office.context && Office.context.mailbox) {
+    Office.context.mailbox.displayNewMessageForm({
+      toRecipients: [assignee.toLowerCase().replace(' ','.')+('@company.com')],
+      subject: 'Task assigned: ' + title,
+      htmlBody: `<p>Hi ${assignee.split(' ')[0]},</p><p>You have been assigned a new task: <strong>${title}</strong></p><p>Due date: ${due} · Priority: ${priority}</p><p>Please confirm receipt.</p><p>Best regards,<br>Sanchita Singh</p>`
+    });
+  }
+}
+
+function assignTaskFromEmail() {
+  showTab('tasks'); toggleTaskForm();
+}
+
+function toggleTask(id) {
+  const t = TASKS.find(t=>t.id===id);
+  if(t) { t.done=!t.done; renderTasks(); renderTeam(); }
+}
+
+function followUpOverdue() {
+  const overdue = TASKS.filter(t=>t.overdue&&!t.done);
+  if(!overdue.length) { alert('No overdue tasks — great job!'); return; }
+  const names = [...new Set(overdue.map(t=>t.assignee))].join(', ');
+  alert('Draft follow-up emails ready for: ' + names + '\n\nThese will be opened in Outlook for your review before sending.');
+}
+
+/* ── TEAM ── */
+function draftFollowUp(name) {
+  const tasks = TASKS.filter(t=>t.assignee===name&&t.overdue&&!t.done);
+  const taskList = tasks.map(t=>'• '+t.title).join('\n');
+  if(Office && Office.context && Office.context.mailbox) {
+    Office.context.mailbox.displayNewMessageForm({
+      toRecipients: [name.toLowerCase().replace(' ','.')+('@company.com')],
+      subject: 'Follow-up: Overdue tasks',
+      htmlBody: `<p>Hi ${name.split(' ')[0]},</p><p>I wanted to follow up on the following tasks which appear to be overdue:</p><p>${taskList.replace(/\n/g,'<br>')}</p><p>Could you please provide a status update and revised completion date?</p><p>Thank you,<br>Sanchita Singh</p>`
+    });
+  } else {
+    alert('Follow-up draft for ' + name + ':\n\n' + taskList + '\n\n(Will open in Outlook when add-in is installed)');
+  }
+}
+
+/* ── PLANNER ── */
+function rebuildPlan() {
+  alert('Plan rebuilt based on current tasks and team status.\n\n3 overdue items prioritised. 2 staff sync slots added. Deep work block preserved.');
+}
+
+/* ── INIT ── */
+function initOffice() {
+  renderEmails(); renderTasks(); renderTeam(); renderPlan();
+  try { loadCurrentEmail(); } catch(e) {}
+}
+
+if(typeof Office !== 'undefined') {
+  Office.onReady(function(info) { initOffice(); });
+} else {
+  document.addEventListener('DOMContentLoaded', initOffice);
+}
+</script>
+</body>
+</html>
