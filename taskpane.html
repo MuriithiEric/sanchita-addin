@@ -315,7 +315,7 @@ async function loadTasks() {
     TASKS = (data.value || []).map(item => ({
       id: item.id,
       title: item.fields.Title || 'Untitled',
-      assignee: item.fields['Assigned_x0020_ToLookupId'] ? (item.fields.Assigned_x0020_To?.Email || item.fields.Assigned_x0020_To || '') : (item.fields.Assigned_x0020_To || ''),
+      assignee: item.fields['Assigned_x0020_To'] || '',
       status: item.fields.Status || 'Not Started',
       priority: item.fields.Priority || 'Medium',
       due: item.fields.Due_x0020_Date?.split('T')[0] || '',
@@ -445,6 +445,7 @@ async function createTask() {
   if (accessToken && siteId && listId) {
     const fields = { Title: title, Status: 'Not Started', Priority: priority, Notes: notes };
     if (due) fields['Due_x0020_Date'] = due;
+    if (assignee) fields['Assigned_x0020_To'] = assignee;
     const result = await graphPost(`/sites/${siteId}/lists/${listId}/items`, { fields });
     if (result.id) newTask.id = result.id;
   }
